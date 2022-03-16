@@ -18,7 +18,7 @@ print('Hola mundo \n')
 
 colors = ['tab:green', 'orange', 'orange', 'darkred', 'darkred', 'white', 'indigo', 'black', 'black', 'black', 'silver', 'silver', 'silver', 'silver', 'silver', 'silver', 'indigo']
 N=20
-NN = N*10
+NN = N*3
 numNodes = NN
 
 # numNodes = 50
@@ -61,9 +61,9 @@ gamma = 1/6
 
 Q_days = np.array([14])
 
-T = 8*7
+T = 4*7
 rates = ['exponential_rates']
-rates = ['time_in_state']
+#rates = ['time_in_state']
 
 Interactions = [1, 0]
 
@@ -84,7 +84,7 @@ for interaction in Interactions:
 				model = ExtSEIRSNetworkModel(G=G, beta=beta, beta_local = beta_local, beta_asym_local=beta_local,  beta_Q = 0, sigma=sigma, lamda = lamda, gamma = gamma,
 				 gamma_asym=gamma, a = 1,  p=0, q=0, G_Q=G, initE=0, initI_pre=0, initI_asym=0, isolation_time = d, sigma_Q = sigma, lamda_Q = lamda, 
 				 gamma_Q_asym = gamma, gamma_Q_sym = gamma, transition_mode = rates[0], prevalence_ext = p_ext,
-				 o = 2/7, store_Xseries=True)
+				 o = 0.7, store_Xseries=True)
 				
 				#checkpoints = {'t': [20, 100], 'G': [G_distancing, G_normal], 'p': [0.1, 0.5], 'theta_E': [0.02, 0.02], 'theta_I': [0.02, 0.02], 'phi_E':   [0.2, 0.2], 'phi_I':   [0.2, 0.2]}
 				#model.run(T=7*4, checkpoints=None)
@@ -92,11 +92,11 @@ for interaction in Interactions:
 				run_tti_sim(model = model, T=T, max_dt=None, testing_cadence = frequency, testing_compliance_random = np.array([True]*NN), 
 					isolation_compliance_positive_individual = [True]*NN, isolation_compliance_positive_groupmate = np.array([True]*NN), 
 					isolation_groups = np.array([[np.arange(i*N, (i+1)*N)]*N for i in np.arange(NN/N)], dtype = int).reshape(NN, N), 
-					isolation_lag_positive = 0)
+					isolation_lag_positive = 1, isolation_lag_contact = 1)
 				numQ = model.numQ_S + model.numQ_E + model.numQ_pre + model.numQ_asym + model.numQ_R
 
 				#-----------------------------------------------------
-				fig1, ax1 = plt.subplots(figsize = (12,8), gridspec_kw={'bottom': 0.15, 'left': 0.14, 'right':.9})
+				fig1, ax1 = plt.subplots(figsize = (12,8), gridspec_kw={'bottom': 0.15, 'left': 0.1, 'right':.9})
 				#ax2.stackplot(model.tseries, [model.numS ,model.numE, model.numI_pre, model.numI_asym, model.numR, model.numQ_S, model.numQ_E, model.numQ_pre, model.numQ_asym, model.numQ_R], labels = ['S', 'E', 'pre', 'I', 'R', 'Q_S', 'Q_E', 'Q_pre', 'Q_I', 'Q_R'], colors = ['darkblue', 'darkred', 'darkgreen', 'indigo', 'darkgoldenrod', 'blue', 'red', 'green', 'blueviolet', 'orange'])
 				ax1.stackplot(model.tseries, [model.numS ,model.numE, model.numI_pre, model.numI_asym, model.numR, numQ], labels = ['S', 'E', 'pre', 'I', 'R', 'Q'], colors = ['tab:green', 'orange', 'orange', 'darkred', 'indigo', 'silver'])
 				ax1.vlines(cadence_testing_days[frequency], 0, NN, color = 'black', linestyle = '--')
@@ -112,7 +112,8 @@ for interaction in Interactions:
 				labels_symbols = ['S', 'E', 'I', 'R', 'Q']
 				ax1.legend(lines_symbols, labels_symbols, fontsize = 22, loc = 4)
 				ax1.set_title('%d days of Quarantine for non-positive individuals'%(d), fontsize = 24)
-				fig1.savefig('../Figures/1_Extended_Model/examples/population_R0-%.1f_d-%d_prev-%.1e_interactions-%d.png'%(R0, d, p_ext, interaction))
+				ax1.set_xlim(left = 0, right=T)
+				fig1.savefig('../../Figures/1_Extended_Model/examples/population_R0-%.1f_d-%d_prev-%.1e_interactions-%d.png'%(R0, d, p_ext, interaction))
 				plt.close(fig1)
 				#-----------------------------------------------------
 				reg_dt = 1e-3
@@ -127,7 +128,7 @@ for interaction in Interactions:
 					else:
 						j+=1
 
-				fig2, ax2 = plt.subplots(figsize = (12,8), gridspec_kw={'bottom': 0.15, 'left': 0.1, 'right':.85})
+				fig2, ax2 = plt.subplots(figsize = (12,8), gridspec_kw={'bottom': 0.15, 'left': 0.1, 'right':.9})
 				sns.heatmap(reg_Xseries[:60, :], cmap = colors,  ax = ax2, cbar = False)
 				ax2.hlines([i*N for i in np.arange(NN/N)], 0, ax2.get_xlim()[1], color = 'black', linewidth = .5)
 				ax2.vlines(np.array(cadence_testing_days[frequency], dtype=int)/reg_dt, 0, NN, color = 'black', linestyle = '--')
@@ -138,7 +139,7 @@ for interaction in Interactions:
 				#ax2.set_yticklabels(FormatStrFormatter('%d').format_ticks(np.arange(1, NN/N + 1)))
 				ax2.set_xticks(np.arange(0, len(reg_time), int(2/reg_dt)))
 				ax2.set_xticklabels(FormatStrFormatter('%.f').format_ticks(reg_time[::int(2/reg_dt)]))
-				#ax2.set_xlim(right=T*reg_dt)
+				ax2.set_xlim(left = 0, right=T/reg_dt)
 				lines_symbols = [Line2D([0], [0], color=colors[0], linestyle='', marker = 's', ms = 10, alpha = 1), 
 				Line2D([0], [0], color=colors[1], linestyle='', marker = 's', ms = 10, alpha = 1), 
 				Line2D([0], [0], color=colors[3], linestyle='', marker = 's', ms = 10, alpha = 1), 
@@ -147,6 +148,6 @@ for interaction in Interactions:
 				labels_symbols = ['S', 'E', 'I', 'R', 'Q']
 				ax2.legend(lines_symbols, labels_symbols, fontsize = 22, bbox_to_anchor=(1.2, .8))
 				ax2.set_title('%d days of Quarantine for non-positive individuals'%(d), fontsize = 24)
-				fig2.savefig('../Figures/1_Extended_Model/examples/groups_R0-%.1f_d-%d_prev-%.1e.png'%(R0, d, p_ext))
+				fig2.savefig('../../Figures/1_Extended_Model/examples/groups_R0-%.1f_d-%d_prev-%.1e_interactions-%d.png'%(R0, d, p_ext, interaction))
 				plt.close(fig2)
 

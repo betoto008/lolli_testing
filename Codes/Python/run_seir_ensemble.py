@@ -12,7 +12,7 @@ from sim_loops import *
 from utilities import *
 from functions import *
 
-Text_files_path = '../Text_files/SEIR_ensemble/'
+Text_files_path = '../../Text_files/SEIR_ensemble/'
 
 print('Hola mundo \n')
 
@@ -41,7 +41,7 @@ G = networkx.convert_matrix.from_numpy_matrix(G)
 N_ensemble = 10000
 testing_frequencies = ['weekly2', 'semiweekly2', 'triweekly', 'never']
 #testing_frequencies = ['weekly2']
-p_exts = [1e-4]
+p_exts = [1e-4, 1e-3]
 R0s = np.array([7.5, 4.5, 2.5])
 sigma = 1/3
 lamda = 1e6
@@ -80,11 +80,11 @@ for rate in np.arange(len(rates)):
 							model = ExtSEIRSNetworkModel(G=G, beta=beta, beta_local = beta_local, beta_asym_local=beta_local,  beta_Q = 0, sigma=sigma, lamda = lamda, 
 								gamma = gamma, gamma_asym=gamma, a = 1,  p=p, q=0, G_Q=G, initI_asym=0, isolation_time = d, sigma_Q = sigma, 
 								lamda_Q = lamda, gamma_Q_asym = gamma, gamma_Q_sym = gamma, transition_mode = rates[rate], prevalence_ext = p_ext, 
-								o = 2/7)
+								o = 0.7)
 
 							run_tti_sim(model = model, T=T, max_dt=None, testing_cadence = testing_frequency, testing_compliance_random = np.array([True]*NN), isolation_compliance_positive_individual = [True]*NN,
 								isolation_compliance_positive_groupmate = np.array([True]*NN), isolation_groups = np.array([[np.arange(i*N, (i+1)*N)]*N for i in np.arange(NN/N)], dtype = int).reshape(NN, N), 
-								isolation_lag_positive = 0, print_report = False)
+								isolation_lag_positive = 1, isolation_lag_contact = 1, print_report = False)
 
 							I_cum = np.append(I_cum, (model.numE[-1] + model.numI_pre[-1] + model.numI_sym[-1] + model.numI_asym[-1] + model.numR[-1] + model.numQ_E[-1] + model.numQ_pre[-1] + model.numQ_sym[-1] + model.numQ_asym[-1] + model.numQ_R[-1]))
 							S_cum = np.append(S_cum, (model.numS[-1] + model.numQ_S[-1]))
