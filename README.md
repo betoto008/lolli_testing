@@ -14,3 +14,5 @@ The main analysis of simulation outputs if done with /Codes/Python/analysis_ense
 /Codes/lib contains the important classes and fucntions to run the model
 /Codes/Python/run_seir.py performs the simulation of one population for given time T and outputs two figures in /Figures/1_Extended_Model/examples
 /Codes/Python/run_seir_ensemble.py performs the simulation of an ensemble of populations for a given time T and outputs total number of infected and susceptible individuals at the end of the time in *.pkl files at /Textfiles/SEIR_ensemble.
+
+All the codes run stably under Python 3.8.5 and require the following libraries: numpy, matplotlib, networkx, tqdm, pandas, sys, time, random, bisect, math, os, scipy, FARZ and pickle.
